@@ -1,6 +1,7 @@
 package net.gongmingqm10.proficiency.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,14 +10,23 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import net.gongmingqm10.proficiency.R;
+import net.gongmingqm10.proficiency.imageloader.ImageLoader;
 import net.gongmingqm10.proficiency.model.Item;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class FactsAdapter extends BaseAdapter {
 
     private final Context context;
     private Item[] items;
 
-    public FactsAdapter(Context context) {this.context = context;}
+    private Map<String, Bitmap> cachedBitmaps;
+
+    public FactsAdapter(Context context) {
+        this.context = context;
+        cachedBitmaps = new HashMap<String, Bitmap>();
+    }
 
     public void setItems(Item[] items) {
         this.items = items;
@@ -53,8 +63,9 @@ public class FactsAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         final Item item = items[position];
-        holder.title.setText(item.getTitle());
-        holder.description.setText(item.getDescription());
+        if (item.getTitle() != null) holder.title.setText(item.getTitle());
+        if (item.getTitle() != null) holder.description.setText(item.getDescription());
+        ImageLoader.getInstance().load(item.getImageHref(), holder.image);
 
         return convertView;
     }

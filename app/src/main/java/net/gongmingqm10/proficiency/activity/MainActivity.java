@@ -1,17 +1,29 @@
-package net.gongmingqm10.proficiency;
+package net.gongmingqm10.proficiency.activity;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
+
+import net.gongmingqm10.proficiency.R;
 
 
 public class MainActivity extends ActionBarActivity {
+
+
+    private ListView listView ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        init();
+    }
+
+    private void init() {
+        getSupportActionBar().setTitle("About Canada");
+        listView = (ListView) findViewById(R.id.listView);
     }
 
 

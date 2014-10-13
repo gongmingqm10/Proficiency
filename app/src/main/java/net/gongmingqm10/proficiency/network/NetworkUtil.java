@@ -10,8 +10,6 @@ import java.net.URL;
 
 public class NetworkUtil {
 
-    private static Gson gson;
-
     public static synchronized Object call(String urlString, Class<?> clazz) {
         InputStream is = null;
         Object object = null;
@@ -23,7 +21,7 @@ public class NetworkUtil {
             conn.setDoInput(true);
             conn.connect();
             is = conn.getInputStream();
-            object = getGson().fromJson(parseStringFromInputStream(is), clazz);
+            object = new Gson().fromJson(parseStringFromInputStream(is), clazz);
         } catch (Exception e) {
             e.printStackTrace();
             errorMessage = e.getMessage().toString();
@@ -35,13 +33,6 @@ public class NetworkUtil {
             }
             return errorMessage == null ? object : errorMessage;
         }
-    }
-
-    private static Gson getGson() {
-        if (gson == null) {
-            gson = new Gson();
-        }
-        return gson;
     }
 
     private static String parseStringFromInputStream(InputStream is) throws IOException {

@@ -2,17 +2,24 @@ package net.gongmingqm10.proficiency.activity;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import net.gongmingqm10.proficiency.R;
+import net.gongmingqm10.proficiency.api.ApiCallResponse;
+import net.gongmingqm10.proficiency.api.CanadaFactsApi;
+import net.gongmingqm10.proficiency.model.Facts;
+import net.gongmingqm10.proficiency.network.NetworkMgr;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements NetworkMgr.OnApiCallFinishListener{
 
 
     private ListView listView ;
+    private CanadaFactsApi factsApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,8 +29,26 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void init() {
+        factsApi = new CanadaFactsApi();
         getSupportActionBar().setTitle("About Canada");
         listView = (ListView) findViewById(R.id.listView);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        NetworkMgr.getInstance().addOnApiCallFinishListener(this);
+        startSync();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        NetworkMgr.getInstance().removeOnApiCallFinishListener(this);
+    }
+
+    private void startSync() {
+        NetworkMgr.getInstance().startSync(factsApi);
     }
 
 
@@ -44,5 +69,17 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onApiCallFinish(ApiCallResponse<?> data) {
+        if (data != null && data.getAbsApi() == factsApi) {
+            if (data.isSuccess()) {
+                Facts facts = (Facts) data.getData();
+                Log.i("gongmingqm10", String.valueOf(facts.getRows()));
+            } else {
+                Toast.makeText(this, data.getErrorMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

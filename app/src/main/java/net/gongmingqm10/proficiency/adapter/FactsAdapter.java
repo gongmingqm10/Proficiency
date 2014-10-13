@@ -1,7 +1,6 @@
 package net.gongmingqm10.proficiency.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,19 +12,13 @@ import net.gongmingqm10.proficiency.R;
 import net.gongmingqm10.proficiency.imageloader.ImageLoader;
 import net.gongmingqm10.proficiency.model.Item;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class FactsAdapter extends BaseAdapter {
 
     private final Context context;
     private Item[] items;
 
-    private Map<String, Bitmap> cachedBitmaps;
-
     public FactsAdapter(Context context) {
         this.context = context;
-        cachedBitmaps = new HashMap<String, Bitmap>();
     }
 
     public void setItems(Item[] items) {
@@ -70,7 +63,7 @@ public class FactsAdapter extends BaseAdapter {
         return convertView;
     }
 
-    private class ViewHolder{
+    private class ViewHolder {
         TextView title;
         TextView description;
         ImageView image;

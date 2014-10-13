@@ -15,6 +15,9 @@ public class NetworkMgr {
 
     private static final int API_CALL_FINISHED = 100;
     private static NetworkMgr instance;
+    private final int corePoolSize = 2;
+    private final int maximumPoolSize = 5;
+    private final int keepAliveTime = 60;
     private ThreadPoolExecutor threadPoolExecutor;
     private ConcurrentLinkedQueue<OnApiCallFinishListener> listeners;
 
@@ -30,7 +33,7 @@ public class NetworkMgr {
     };
 
     private NetworkMgr() {
-        threadPoolExecutor = new ThreadPoolExecutor(2, 5, 60, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>());
+        threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>());
         listeners = new ConcurrentLinkedQueue<OnApiCallFinishListener>();
     }
 

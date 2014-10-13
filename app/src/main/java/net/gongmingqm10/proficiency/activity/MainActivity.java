@@ -1,11 +1,9 @@
 package net.gongmingqm10.proficiency.activity;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -17,10 +15,10 @@ import net.gongmingqm10.proficiency.model.Facts;
 import net.gongmingqm10.proficiency.network.NetworkMgr;
 
 
-public class MainActivity extends ActionBarActivity implements NetworkMgr.OnApiCallFinishListener{
+public class MainActivity extends ActionBarActivity implements NetworkMgr.OnApiCallFinishListener {
 
 
-    private ListView listView ;
+    private ListView listView;
     private CanadaFactsApi factsApi;
     private FactsAdapter factsAdapter;
     private MenuItem refreshMenuItem;
@@ -92,7 +90,7 @@ public class MainActivity extends ActionBarActivity implements NetworkMgr.OnApiC
         if (data != null && data.getAbsApi() == factsApi) {
             if (data.isSuccess()) {
                 Facts facts = (Facts) data.getData();
-                if (facts.getRows() != null )
+                if (facts.getRows() != null)
                     factsAdapter.setItems(facts.getRows());
             } else {
                 Toast.makeText(this, data.getErrorMessage(), Toast.LENGTH_SHORT).show();

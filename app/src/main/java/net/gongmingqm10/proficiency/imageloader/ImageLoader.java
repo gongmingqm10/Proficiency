@@ -24,9 +24,20 @@ public class ImageLoader {
     private final int maximumPoolSize = 5;
     private final int keepAliveTime = 60;
     private final int IMAGE_LOAD_MESSAGE = 200;
+    Handler handler = new Handler() {
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == IMAGE_LOAD_MESSAGE) {
+                Bitmap bitmap = cachedBitmaps.get(msg.obj);
+                if (bitmap != null) target.setImageBitmap(bitmap);
+            }
+
+        }
+    };
     private ThreadPoolExecutor threadPoolExecutor;
     private ImageView target;
-
     private Map<String, Bitmap> cachedBitmaps;
 
     private ImageLoader() {
@@ -45,7 +56,7 @@ public class ImageLoader {
         load(urlString, R.drawable.placeholder, imageView);
     }
 
-    public void load (final String urlString, int placeholder, final ImageView imageView) {
+    public void load(final String urlString, int placeholder, final ImageView imageView) {
         imageView.setImageResource(placeholder);
         if (urlString == null || "".equals(urlString)) return;
         Bitmap cachedBitmap = cachedBitmaps.get(urlString);
@@ -71,17 +82,4 @@ public class ImageLoader {
             }
         });
     }
-
-    Handler handler = new Handler(){
-
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (msg.what == IMAGE_LOAD_MESSAGE) {
-                Bitmap bitmap = cachedBitmaps.get(msg.obj);
-                if (bitmap != null) target.setImageBitmap(bitmap);
-            }
-
-        }
-    };
 }

@@ -24,7 +24,7 @@ public class NetworkUtil {
             object = new Gson().fromJson(parseStringFromInputStream(is), clazz);
         } catch (Exception e) {
             e.printStackTrace();
-            errorMessage = e.getMessage().toString();
+            errorMessage = "Network connection timeout, please try again later";
         } finally {
             try {
                 if (is != null) is.close();

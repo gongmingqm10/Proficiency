@@ -5,10 +5,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import net.gongmingqm10.proficiency.R;
+import net.gongmingqm10.proficiency.adapter.FactsAdapter;
 import net.gongmingqm10.proficiency.api.ApiCallResponse;
 import net.gongmingqm10.proficiency.api.CanadaFactsApi;
 import net.gongmingqm10.proficiency.model.Facts;
@@ -20,6 +22,8 @@ public class MainActivity extends ActionBarActivity implements NetworkMgr.OnApiC
 
     private ListView listView ;
     private CanadaFactsApi factsApi;
+    private FactsAdapter factsAdapter;
+    private MenuItem refreshMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,8 +34,10 @@ public class MainActivity extends ActionBarActivity implements NetworkMgr.OnApiC
 
     private void init() {
         factsApi = new CanadaFactsApi();
-        getSupportActionBar().setTitle("About Canada");
+        factsAdapter = new FactsAdapter(getApplicationContext());
+
         listView = (ListView) findViewById(R.id.listView);
+        listView.setAdapter(factsAdapter);
     }
 
     @Override
@@ -48,24 +54,34 @@ public class MainActivity extends ActionBarActivity implements NetworkMgr.OnApiC
     }
 
     private void startSync() {
+        setRefreshActionButtonState(true);
         NetworkMgr.getInstance().startSync(factsApi);
+    }
+
+
+    public void setRefreshActionButtonState(boolean isRefreshing) {
+        if (refreshMenuItem != null) {
+            if (isRefreshing) {
+                refreshMenuItem.setActionView(R.layout.indeterminate_progress);
+            } else {
+                refreshMenuItem.setActionView(null);
+            }
+        }
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        this.refreshMenuItem = menu.findItem(R.id.action_refresh);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_refresh) {
+            startSync();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -76,10 +92,12 @@ public class MainActivity extends ActionBarActivity implements NetworkMgr.OnApiC
         if (data != null && data.getAbsApi() == factsApi) {
             if (data.isSuccess()) {
                 Facts facts = (Facts) data.getData();
-                Log.i("gongmingqm10", String.valueOf(facts.getRows()));
+                if (facts.getRows() != null )
+                    factsAdapter.setItems(facts.getRows());
             } else {
                 Toast.makeText(this, data.getErrorMessage(), Toast.LENGTH_SHORT).show();
             }
+            setRefreshActionButtonState(false);
         }
     }
 }

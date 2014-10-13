@@ -90,6 +90,8 @@ public class MainActivity extends ActionBarActivity implements NetworkMgr.OnApiC
         if (data != null && data.getAbsApi() == factsApi) {
             if (data.isSuccess()) {
                 Facts facts = (Facts) data.getData();
+                if (facts.getTitle() != null)
+                    getSupportActionBar().setTitle(facts.getTitle());
                 if (facts.getRows() != null)
                     factsAdapter.setItems(facts.getRows());
             } else {

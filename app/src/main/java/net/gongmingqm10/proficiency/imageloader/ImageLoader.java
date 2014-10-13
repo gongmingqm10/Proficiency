@@ -11,8 +11,8 @@ import net.gongmingqm10.proficiency.R;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +31,8 @@ public class ImageLoader {
             super.handleMessage(msg);
             if (msg.what == IMAGE_LOAD_MESSAGE) {
                 Bitmap bitmap = cachedBitmaps.get(msg.obj);
-                if (bitmap != null) target.setImageBitmap(bitmap);
+                if (bitmap != null && msg.obj.equals(target.getTag()))
+                    target.setImageBitmap(bitmap);
             }
 
         }
@@ -41,7 +42,7 @@ public class ImageLoader {
     private Map<String, Bitmap> cachedBitmaps;
 
     private ImageLoader() {
-        cachedBitmaps = new HashMap<String, Bitmap>();
+        cachedBitmaps = new ConcurrentHashMap<String, Bitmap>();
         threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>());
     }
 
@@ -58,6 +59,7 @@ public class ImageLoader {
 
     public void load(final String urlString, int placeholder, final ImageView imageView) {
         imageView.setImageResource(placeholder);
+        imageView.setTag(urlString);
         if (urlString == null || "".equals(urlString)) return;
         Bitmap cachedBitmap = cachedBitmaps.get(urlString);
         if (cachedBitmap != null) {

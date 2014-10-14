@@ -20,8 +20,9 @@ import java.util.concurrent.TimeUnit;
 public class ImageLoader {
 
     private static ImageLoader instance;
-    private final int corePoolSize = 2;
-    private final int maximumPoolSize = 5;
+    private final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+    private final int corePoolSize = CPU_COUNT + 1;
+    private final int maximumPoolSize = CPU_COUNT * 2 + 1;
     private final int keepAliveTime = 60;
     private final int IMAGE_LOAD_MESSAGE = 200;
     Handler handler = new Handler() {

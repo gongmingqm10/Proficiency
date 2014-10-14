@@ -15,8 +15,9 @@ public class NetworkMgr {
 
     private static final int API_CALL_FINISHED = 100;
     private static NetworkMgr instance;
-    private final int corePoolSize = 2;
-    private final int maximumPoolSize = 5;
+    private final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+    private final int corePoolSize = CPU_COUNT + 1;
+    private final int maximumPoolSize = CPU_COUNT * 2 + 1;
     private final int keepAliveTime = 60;
     private ThreadPoolExecutor threadPoolExecutor;
     private ConcurrentLinkedQueue<OnApiCallFinishListener> listeners;

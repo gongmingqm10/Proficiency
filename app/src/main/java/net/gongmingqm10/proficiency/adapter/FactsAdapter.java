@@ -12,29 +12,37 @@ import net.gongmingqm10.proficiency.R;
 import net.gongmingqm10.proficiency.imageloader.ImageLoader;
 import net.gongmingqm10.proficiency.model.Item;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FactsAdapter extends BaseAdapter {
 
     private final Context context;
-    private Item[] items;
+    private List<Item> itemList;
 
     public FactsAdapter(Context context) {
         this.context = context;
+        this.itemList = new ArrayList<Item>();
     }
 
     public void setItems(Item[] items) {
-        this.items = items;
+        for (Item item : items) {
+            if (item.isValid()) {
+                this.itemList.add(item);
+            }
+        }
         notifyDataSetChanged();
     }
 
 
     @Override
     public int getCount() {
-        return (items == null) ? 0 : items.length;
+        return (itemList == null) ? 0 : itemList.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return (items == null) ? null : items[position];
+        return (itemList == null) ? null : itemList.get(position);
     }
 
     @Override
@@ -55,10 +63,10 @@ public class FactsAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        final Item item = items[position];
-        if (item.getTitle() != null) holder.title.setText(item.getTitle());
-        if (item.getTitle() != null) holder.description.setText(item.getDescription());
-        ImageLoader.getInstance().load(item.getImageHref(), holder.image);
+        final Item item = (Item) getItem(position);
+        holder.title.setText(item.getTitle());
+        holder.description.setText(item.getDescription());
+        ImageLoader.getInstance().load(item.getImageHref(), R.drawable.placeholder, holder.image);
 
         return convertView;
     }

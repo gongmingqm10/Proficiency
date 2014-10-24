@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.util.LruCache;
 import android.widget.ImageView;
 
 import net.gongmingqm10.proficiency.R;
@@ -25,25 +26,27 @@ public class ImageLoader {
     private final int maximumPoolSize = CPU_COUNT * 2 + 1;
     private final int keepAliveTime = 60;
     private final int IMAGE_LOAD_MESSAGE = 200;
+
     Handler handler = new Handler() {
 
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == IMAGE_LOAD_MESSAGE) {
-                Bitmap bitmap = cachedBitmaps.get(msg.obj);
-                if (bitmap != null && msg.obj.equals(target.getTag()))
-                    target.setImageBitmap(bitmap);
+                ImageView target = (ImageView) msg.obj;
+                Bitmap bitmap = bitmapLruCache.get((String) target.getTag());
+                if (bitmap != null) target.setImageBitmap(bitmap);
             }
 
         }
     };
     private ThreadPoolExecutor threadPoolExecutor;
-    private ImageView target;
-    private Map<String, Bitmap> cachedBitmaps;
+    private LruCache<String, Bitmap> bitmapLruCache;
 
     private ImageLoader() {
-        cachedBitmaps = new ConcurrentHashMap<String, Bitmap>();
+        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        final int cacheSize = maxMemory / 8;
+        bitmapLruCache = new LruCache<String, Bitmap>(cacheSize);
         threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>());
     }
 
@@ -55,28 +58,27 @@ public class ImageLoader {
     }
 
     public void load(final String urlString, final ImageView imageView) {
-        load(urlString, R.drawable.placeholder, imageView);
+        load(urlString, 0, imageView);
     }
 
     public void load(final String urlString, int placeholder, final ImageView imageView) {
-        imageView.setImageResource(placeholder);
-        imageView.setTag(urlString);
+        if (placeholder != 0) imageView.setImageResource(placeholder);
         if (urlString == null || "".equals(urlString)) return;
-        Bitmap cachedBitmap = cachedBitmaps.get(urlString);
+        Bitmap cachedBitmap = bitmapLruCache.get(urlString);
         if (cachedBitmap != null) {
-            imageView.setImageBitmap(cachedBitmaps.get(urlString));
+            imageView.setImageBitmap(cachedBitmap);
             return;
         }
-
         threadPoolExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 try {
                     URL url = new URL(urlString);
                     Bitmap bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                    cachedBitmaps.put(urlString, bitmap);
-                    target = imageView;
-                    handler.sendMessage(handler.obtainMessage(IMAGE_LOAD_MESSAGE, urlString));
+                    if (bitmap == null) return;
+                    bitmapLruCache.put(urlString, bitmap);
+                    imageView.setTag(urlString);
+                    handler.sendMessage(handler.obtainMessage(IMAGE_LOAD_MESSAGE, imageView));
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (IOException e) {

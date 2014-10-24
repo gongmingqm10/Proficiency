@@ -1,9 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        debug {
+        }
+    }
     compileSdkVersion 20
     buildToolsVersion "20.0.0"
-
     defaultConfig {
         applicationId "net.gongmingqm10.proficiency"
         minSdkVersion 11
@@ -13,7 +16,7 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
+            runProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

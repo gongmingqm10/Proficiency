@@ -9,7 +9,7 @@ public class Item implements Serializable {
     private String imageHref;
 
     public String getTitle() {
-        return title;
+        return title == null ? "" : title;
     }
 
     public void setTitle(String title) {
@@ -17,7 +17,7 @@ public class Item implements Serializable {
     }
 
     public String getDescription() {
-        return description;
+        return description == null ? "" : description;
     }
 
     public void setDescription(String description) {
@@ -30,5 +30,9 @@ public class Item implements Serializable {
 
     public void setImageHref(String imageHref) {
         this.imageHref = imageHref;
+    }
+
+    public boolean isValid() {
+        return title != null || description != null || imageHref != null;
     }
 }

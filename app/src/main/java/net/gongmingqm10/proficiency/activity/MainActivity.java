@@ -7,16 +7,25 @@ import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import net.gongmingqm10.proficiency.R;
 import net.gongmingqm10.proficiency.adapter.FactsAdapter;
 import net.gongmingqm10.proficiency.api.ApiCallResponse;
 import net.gongmingqm10.proficiency.api.CanadaFactsApi;
+import net.gongmingqm10.proficiency.cache.CacheData;
+import net.gongmingqm10.proficiency.cache.CacheManager;
+import net.gongmingqm10.proficiency.cache.CacheUtils;
 import net.gongmingqm10.proficiency.model.Facts;
 import net.gongmingqm10.proficiency.network.NetworkMgr;
+import net.gongmingqm10.proficiency.network.NetworkUtil;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 public class MainActivity extends ActionBarActivity implements NetworkMgr.OnApiCallFinishListener {
-
 
     private ListView listView;
     private CanadaFactsApi factsApi;
@@ -42,7 +51,18 @@ public class MainActivity extends ActionBarActivity implements NetworkMgr.OnApiC
     protected void onStart() {
         super.onStart();
         NetworkMgr.getInstance().addOnApiCallFinishListener(this);
-        startSync();
+        loadFacts();
+
+    }
+
+    private void loadFacts() {
+        CacheData<Facts> cacheFacts = CacheManager.getInstance().getCache(CacheUtils.CACHE_FACTS);
+        if (cacheFacts != null) {
+            Facts facts = cacheFacts.getData();
+            refreshUI(facts);
+        } else {
+            startSync();
+        }
     }
 
     @Override
@@ -55,7 +75,6 @@ public class MainActivity extends ActionBarActivity implements NetworkMgr.OnApiC
         setRefreshActionButtonState(true);
         NetworkMgr.getInstance().startSync(factsApi);
     }
-
 
     public void setRefreshActionButtonState(boolean isRefreshing) {
         if (refreshMenuItem != null) {
@@ -88,16 +107,39 @@ public class MainActivity extends ActionBarActivity implements NetworkMgr.OnApiC
     @Override
     public void onApiCallFinish(ApiCallResponse<?> data) {
         if (data != null && data.getAbsApi() == factsApi) {
+            Facts facts;
             if (data.isSuccess()) {
-                Facts facts = (Facts) data.getData();
-                if (facts.getTitle() != null)
-                    getSupportActionBar().setTitle(facts.getTitle());
-                if (facts.getRows() != null)
-                    factsAdapter.setItems(facts.getRows());
+                facts = (Facts) data.getData();
             } else {
                 Toast.makeText(this, data.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                // If the facts URL is not available, we use facts.json in assets.
+                facts = loadFactsFromAssets();
             }
-            setRefreshActionButtonState(false);
+            if (facts == null) return;
+            CacheData<Facts> cacheFacts = new CacheData<Facts>(CacheUtils.CACHE_FACTS, facts);
+            CacheManager.getInstance().addCache(cacheFacts);
+            refreshUI(facts);
         }
     }
+
+    private void refreshUI(Facts facts) {
+        setRefreshActionButtonState(false);
+        if (facts.getTitle() != null)
+            getSupportActionBar().setTitle(facts.getTitle());
+        if (facts.getRows() != null)
+            factsAdapter.setItems(facts.getRows());
+    }
+
+
+    private Facts loadFactsFromAssets() {
+        Facts facts = null;
+        try {
+            InputStream is = getAssets().open("facts.json");
+            facts = new Gson().fromJson(NetworkUtil.parseStringFromInputStream(is), Facts.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return facts;
+    }
+
 }

@@ -5,7 +5,8 @@ import net.gongmingqm10.proficiency.network.NetworkUtil;
 
 public class CanadaFactsApi extends AbsApi<Facts> {
 
-    public static final String URL = "http://thoughtworks-ios.herokuapp.com/facts.json";
+//    public static final String URL = "http://thoughtworks-ios.herokuapp.com/facts.json";
+    public static final String URL = "https://dl.dropboxusercontent.com/u/746330/facts.json";
 
     @Override
     public ApiCallResponse<Facts> call() {

@@ -1,13 +1,17 @@
 package net.gongmingqm10.proficiency.imageloader;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.util.LruCache;
+import android.util.Log;
 import android.widget.ImageView;
 
 import net.gongmingqm10.proficiency.R;
+import net.gongmingqm10.proficiency.network.NetworkUtil;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -21,10 +25,11 @@ import java.util.concurrent.TimeUnit;
 public class ImageLoader {
 
     private static ImageLoader instance;
+    private static Context context;
     private final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
     private final int corePoolSize = CPU_COUNT + 1;
     private final int maximumPoolSize = CPU_COUNT * 2 + 1;
-    private final int keepAliveTime = 60;
+    private final int keepAliveTime = 1;
     private final int IMAGE_LOAD_MESSAGE = 200;
 
     Handler handler = new Handler() {
@@ -50,6 +55,10 @@ public class ImageLoader {
         threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>());
     }
 
+    public static void init(Context mContext) {
+        context = mContext;
+    }
+
     public static ImageLoader getInstance() {
         if (instance == null) {
             instance = new ImageLoader();
@@ -69,6 +78,8 @@ public class ImageLoader {
             imageView.setImageBitmap(cachedBitmap);
             return;
         }
+        imageView.setTag(urlString);
+        if (!NetworkUtil.isNetworkAvailable(context)) return;
         threadPoolExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -77,8 +88,9 @@ public class ImageLoader {
                     Bitmap bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream());
                     if (bitmap == null) return;
                     bitmapLruCache.put(urlString, bitmap);
-                    imageView.setTag(urlString);
-                    handler.sendMessage(handler.obtainMessage(IMAGE_LOAD_MESSAGE, imageView));
+                    if(imageView.getTag().equals(urlString)) {
+                        handler.sendMessage(handler.obtainMessage(IMAGE_LOAD_MESSAGE, imageView));
+                    }
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (IOException e) {

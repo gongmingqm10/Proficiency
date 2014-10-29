@@ -8,8 +8,9 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import net.gongmingqm10.proficiency.R;
-import net.gongmingqm10.proficiency.imageloader.ImageLoader;
 import net.gongmingqm10.proficiency.model.Item;
 
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ public class FactsAdapter extends BaseAdapter {
         final Item item = (Item) getItem(position);
         holder.title.setText(item.getTitle());
         holder.description.setText(item.getDescription());
-        ImageLoader.getInstance().load(item.getImageHref(), R.drawable.placeholder, holder.image);
+        Picasso.with(context).load(item.getImageHref()).placeholder(R.drawable.placeholder).into(holder.image);
 
         return convertView;
     }

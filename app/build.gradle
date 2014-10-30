@@ -5,12 +5,12 @@ android {
         debug {
         }
     }
-    compileSdkVersion 20
+    compileSdkVersion 15
     buildToolsVersion "20.0.0"
     defaultConfig {
         applicationId "net.gongmingqm10.proficiency"
         minSdkVersion 11
-        targetSdkVersion 20
+        targetSdkVersion 15
         versionCode 1
         versionName "1.0"
     }
